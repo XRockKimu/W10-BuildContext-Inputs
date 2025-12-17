@@ -28,14 +28,24 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     ),
   ];
 
-  void onAddClicked(BuildContext context)  {
-    showModalBottomSheet<Expense>(
+  void onAddClicked(BuildContext context) async {
+    final newExpense = await showModalBottomSheet<Expense>(
       isScrollControlled: false,
       context: context,
       builder: (c) => Center(child: ExpenseForm()),
     );
 
-    // TODO YOUR CODE HERE
+    if (newExpense != null) {
+      setState(() {
+        _expenses.add(newExpense);
+      });
+    }
+  }
+
+  void _removeExpense(Expense expense) {
+    setState(() {
+      _expenses.remove(expense);
+    });
   }
 
   @override
@@ -54,7 +64,16 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       ),
       body: ListView.builder(
         itemCount: _expenses.length,
-        itemBuilder: (context, index) => ExpenseItem(expense: _expenses[index]),
+        itemBuilder: (context, index) {
+          final expense = _expenses[index];
+          return Dismissible(
+            key: ValueKey(expense.id),
+            onDismissed: (direction) {
+              _removeExpense(expense);
+            },
+            child: ExpenseItem(expense: expense),
+          );
+        },
       ),
     );
   }
